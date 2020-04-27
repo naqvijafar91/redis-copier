@@ -11,6 +11,7 @@ import (
 )
 
 func main() {
+	operationType := flag.String("type", "sortedSet", "data type")
 	sourceAddress := flag.String("s", "localhost:6379", "source address")
 	sourcePassword := flag.String("sp", "", "source password")
 	sourceDb := flag.Int("sdb", 0, " Source Database number")
@@ -30,7 +31,12 @@ func main() {
 	copier := rediscopy.NewCopier(getConnection(*sourceAddress, *sourcePassword, *sourceDb),
 		getConnection(*destinationAddress, *destinationPassword, *destinationDb))
 	// @Todo : Print and ask for confirmation before starting the work
-	err := copier.CopySortedSet(*sourceSetName, *destinationKeyName)
+	var err error
+	if *operationType != "sortedSet" {
+		err = copier.CopyKeyValue(*sourceSetName, *destinationKeyName)
+	} else {
+		err = copier.CopySortedSet(*sourceSetName, *destinationKeyName)
+	}
 	if err != nil {
 		panic(err)
 	}

@@ -1,6 +1,8 @@
 package rediscopy
 
 import (
+	"fmt"
+
 	"github.com/go-redis/redis"
 )
 
@@ -41,6 +43,23 @@ func (cp *Copier) CopySortedSet(sortedSetSource, sortedSetTarget string) error {
 		}
 	}
 
+	return nil
+}
+
+/*
+CopyKeyValue - Copy a key value from production to local instance. Right now copy everything in one instance,
+later it should be done in batches so that we do not put a lot of load on our Redis instance
+*/
+func (cp *Copier) CopyKeyValue(sourceKey, targetKey string) error {
+	val, err := cp.server.Get(sourceKey).Result()
+	if err != nil {
+		return err
+	}
+	fmt.Printf("Copying %s .....", sourceKey)
+	err = cp.local.Set(targetKey, val, 0).Err()
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
